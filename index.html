@@ -694,7 +694,7 @@
     </div>
   </div>
 
-  <!-- WAITLIST — replaces submit section while organization is in pre-launch -->
+  <!-- WAITLIST - replaces submit section while organization is in pre-launch -->
   <div class="section" id="submit">
     <div class="section-header fade">
       <span class="section-index">03</span>
@@ -718,35 +718,21 @@
         </div>
       </div>
       <div class="form-main">
-        <!--
-        =====================================================
-        MAILCHIMP SETUP — replace the three placeholders:
-
-        1. ACTION_URL
-           Mailchimp > Audience > Signup Forms > Embedded Forms
-           e.g. https://yourdomain.us1.list-manage.com/subscribe/post?u=XXXX&id=XXXX
-
-        2. U_VALUE  — the "u" parameter from your Mailchimp action URL
-        3. ID_VALUE — the "id" parameter from your Mailchimp action URL
-
-        Also create a ROLE merge tag in Mailchimp:
-        Audience > Settings > Audience fields and *|MERGE|* tags
-        =====================================================
-        -->
+        <!-- Mailchimp form - wired up to temporary.fund waitlist audience -->
         <form
           class="mc-form"
-          action="ACTION_URL"
+          action="https://fund.us17.list-manage.com/subscribe/post?u=97d55addf1f55cbad35180403&amp;id=21067996e9&amp;f_id=00f5c3e1f0"
           method="post"
           id="mc-embedded-subscribe-form"
           name="mc-embedded-subscribe-form"
           target="_blank"
           onsubmit="handleWaitlist(event)"
         >
-          <input type="hidden" name="u" value="U_VALUE">
-          <input type="hidden" name="id" value="ID_VALUE">
+          <input type="hidden" name="u" value="97d55addf1f55cbad35180403">
+          <input type="hidden" name="id" value="21067996e9">
           <!-- Bot protection - do not remove -->
           <div style="position:absolute;left:-5000px;" aria-hidden="true">
-            <input type="text" name="b_U_VALUE_ID_VALUE" tabindex="-1" value="">
+            <input type="text" name="b_97d55addf1f55cbad35180403_21067996e9" tabindex="-1" value="">
           </div>
 
           <div class="field-row">
@@ -762,9 +748,9 @@
 
           <div class="field">
             <label for="mc-role">I am joining as</label>
-            <select id="mc-role" name="ROLE">
+            <select id="mc-role" name="MMERGE7">
               <option value="" disabled selected>Select one</option>
-              <option value="Creative">A creative seeking guidance</option>
+              <option value="Creative/Participant">A creative seeking guidance</option>
               <option value="Expert">A potential expert partner (legal / financial)</option>
               <option value="Donor">A potential donor or funder</option>
               <option value="Other">Other</option>
