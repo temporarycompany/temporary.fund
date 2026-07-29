@@ -37,15 +37,15 @@
   }
 
   a { color: inherit; text-decoration: none; }
-  .nav-dropdown { position: relative; }
+  .nav-dropdown { position: relative; padding-bottom: 1rem; margin-bottom: -1rem; }
   .nav-dropdown-menu {
     display: none; position: absolute; top: 100%; left: 0;
-    background: var(--white); border: var(--rule); min-width: 140px;
-    padding: 0.5rem 0; z-index: 200; margin-top: 0.5rem;
+    background: var(--white); border: var(--rule); min-width: 150px;
+    padding: 0.4rem 0; z-index: 200; margin-top: 0;
   }
   .nav-dropdown:hover .nav-dropdown-menu { display: block; }
-  .nav-dropdown-menu a { display: block; padding: 0.4rem 1rem; font-size: 0.75rem; color: var(--black); }
-  .nav-dropdown-menu a:hover { color: var(--accent); }
+  .nav-dropdown-menu a { display: block; padding: 0.5rem 1rem; font-size: 0.75rem; color: var(--black); }
+  .nav-dropdown-menu a:hover { color: var(--accent); background: var(--off-white); }
   .nav-dropdown > a::after { content: ' -'; font-size: 0.6rem; color: var(--gray-text); }
 
   /* NAV */
