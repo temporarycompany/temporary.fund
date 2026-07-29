@@ -1,5 +1,23 @@
 {
-  "team": [],
+  "team": [
+    {
+      "name": "Ben Fainlight",
+      "role": "Founder",
+      "descriptor": "",
+      "photo": "https://media.licdn.com/dms/image/v2/D5603AQHS-D8Lyhf4YQ/profile-displayphoto-shrink_200_200/profile-displayphoto-shrink_200_200/0/1696476476903?e=2147483647&v=beta&t=hS799WuozzD3KL4PG4kdNTWsKNG7B4kgx_whpLEA2WE",
+      "bio": "",
+      "links": [
+        {
+          "label": "LinkedIn",
+          "url": "https://www.linkedin.com/in/benjaminfainlight/"
+        },
+        {
+          "label": "Instagram",
+          "url": "https://www.instagram.com/fainlight/"
+        }
+      ]
+    }
+  ],
   "advisors": [],
   "experts": []
 }
