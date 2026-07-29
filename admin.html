@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Admin - temporary.fund</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Departure+Mono&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --white:#ffffff;--off-white:#f9f9f8;--black:#111110;--gray-text:#888885;
+    --gray-light:#e8e8e6;--gray-mid:#c4c4c0;--accent:#0A2BF5;--danger:#c0392b;
+    --serif:'Instrument Serif',Georgia,serif;--mono:'Departure Mono','Courier New',monospace;
+    --sans:-apple-system,'Helvetica Neue',sans-serif;--rule:1px solid var(--gray-light);--pad:1.5rem;
+  }
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0;}
+  html{font-size:15px;}
+  body{background:var(--off-white);color:var(--black);font-family:var(--sans);-webkit-font-smoothing:antialiased;}
+  a{color:inherit;text-decoration:none;}
+
+  /* SETUP & LOGIN */
+  .screen{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:2rem;}
+  .box{background:var(--white);border:var(--rule);padding:2.5rem;width:100%;max-width:420px;}
+  .box-logo{font-size:0.8rem;color:var(--black);margin-bottom:0.25rem;}
+  .box-title{font-family:var(--serif);font-size:1.5rem;font-style:italic;margin-bottom:1.5rem;}
+  .box-sub{font-size:0.88rem;color:var(--gray-text);line-height:1.7;margin-bottom:1.5rem;}
+  .error-msg{font-family:var(--mono);font-size:0.62rem;color:var(--danger);margin-bottom:1rem;display:none;}
+
+  /* ADMIN SHELL */
+  .admin-shell{display:none;min-height:100vh;}
+  .admin-shell.on{display:block;}
+  .top-bar{position:fixed;top:0;left:0;right:0;z-index:100;display:flex;justify-content:space-between;align-items:center;padding:0.9rem var(--pad);background:var(--black);color:var(--white);}
+  .top-bar-logo{font-size:0.8rem;color:var(--white);}
+  .top-bar-links{display:flex;gap:1.25rem;align-items:center;}
+  .top-bar-links a{font-family:var(--mono);font-size:0.62rem;color:var(--gray-mid);transition:color 0.15s;}
+  .top-bar-links a:hover{color:var(--white);}
+  .admin-body{padding-top:52px;display:grid;grid-template-columns:200px 1fr;min-height:100vh;}
+
+  /* SIDEBAR */
+  .sidebar{background:var(--white);border-right:var(--rule);padding:1.5rem 0;position:sticky;top:52px;height:calc(100vh - 52px);overflow-y:auto;}
+  .sb-label{font-family:var(--mono);font-size:0.58rem;color:var(--gray-mid);padding:0 1.25rem;margin-bottom:0.4rem;display:block;letter-spacing:0.05em;}
+  .sb-item{display:block;padding:0.55rem 1.25rem;font-size:0.85rem;color:var(--gray-text);cursor:pointer;transition:color 0.15s;border-left:2px solid transparent;background:none;border-right:none;border-top:none;border-bottom:none;width:100%;text-align:left;}
+  .sb-item:hover{color:var(--black);}
+  .sb-item.on{color:var(--accent);border-left-color:var(--accent);}
+  .sb-divider{height:1px;background:var(--gray-light);margin:1rem 0;}
+
+  /* MAIN */
+  .main{padding:2rem;}
+  .main-hd{display:flex;justify-content:space-between;align-items:baseline;margin-bottom:1.5rem;padding-bottom:1rem;border-bottom:var(--rule);}
+  .main-title{font-family:var(--serif);font-size:1.4rem;font-style:italic;}
+  .main-meta{font-family:var(--mono);font-size:0.62rem;color:var(--gray-text);margin-top:0.2rem;}
+
+  /* PANELS */
+  .panel{display:none;}
+  .panel.on{display:block;}
+
+  /* STATUS BAR */
+  .status-bar{background:var(--off-white);border:var(--rule);padding:0.75rem 1rem;margin-bottom:1.5rem;display:flex;align-items:center;justify-content:space-between;}
+  .status-text{font-family:var(--mono);font-size:0.62rem;color:var(--gray-text);}
+  .status-text.saving{color:var(--accent);}
+  .status-text.saved{color:#1a6b3a;}
+  .status-text.error{color:var(--danger);}
+
+  /* PERSON ROWS */
+  .person-row{display:flex;align-items:center;gap:0.75rem;padding:0.75rem 1rem;background:var(--white);border:var(--rule);margin-bottom:0.4rem;}
+  .p-avatar{width:34px;height:34px;border-radius:50%;background:var(--off-white);flex-shrink:0;object-fit:cover;display:flex;align-items:center;justify-content:center;font-family:var(--serif);font-style:italic;font-size:0.85rem;color:var(--gray-text);overflow:hidden;}
+  .p-info{flex:1;min-width:0;}
+  .p-name{font-size:0.88rem;font-weight:500;}
+  .p-role{font-family:var(--mono);font-size:0.58rem;color:var(--gray-text);}
+  .p-btns{display:flex;gap:0.35rem;}
+  .ic-btn{background:none;border:var(--rule);padding:0.25rem 0.5rem;font-family:var(--mono);font-size:0.55rem;cursor:pointer;color:var(--gray-text);transition:all 0.15s;}
+  .ic-btn:hover{color:var(--black);border-color:var(--black);}
+  .ic-btn.red:hover{color:var(--danger);border-color:var(--danger);}
+
+  /* FORM PANEL */
+  .form-card{background:var(--white);border:var(--rule);padding:1.5rem;margin-bottom:1rem;}
+  .form-card-title{font-family:var(--mono);font-size:0.62rem;color:var(--gray-text);display:block;margin-bottom:1rem;text-transform:uppercase;letter-spacing:0.05em;}
+  .field{margin-bottom:1rem;}
+  .field:last-child{margin-bottom:0;}
+  .frow{display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;}
+  label{font-family:var(--mono);font-size:0.58rem;color:var(--gray-text);display:block;margin-bottom:0.35rem;}
+  input,textarea,select{background:var(--off-white);border:var(--rule);border-radius:0;padding:0.6rem 0.8rem;font-family:var(--sans);font-size:0.9rem;color:var(--black);outline:none;width:100%;transition:border-color 0.15s;-webkit-appearance:none;}
+  input:focus,textarea:focus,select:focus{border-color:var(--black);}
+  textarea{min-height:90px;resize:vertical;}
+
+  /* LINKS */
+  .link-row{display:flex;gap:0.4rem;margin-bottom:0.4rem;}
+  .link-label{width:110px!important;flex:none!important;}
+
+  /* BUTTONS */
+  .btn{font-family:var(--mono);font-size:0.65rem;padding:0.7rem 1.4rem;border:none;cursor:pointer;transition:background 0.15s;}
+  .btn-p{background:var(--black);color:var(--white);}
+  .btn-p:hover{background:var(--accent);}
+  .btn-s{background:var(--white);color:var(--black);border:var(--rule);}
+  .btn-s:hover{border-color:var(--black);}
+  .btn-d{background:var(--white);color:var(--danger);border:1px solid var(--danger);}
+  .btn-d:hover{background:var(--danger);color:var(--white);}
+  .btn-row{display:flex;gap:0.6rem;flex-wrap:wrap;margin-top:1rem;}
+
+  /* PHOTO PREVIEW */
+  .ph-preview{width:56px;height:56px;object-fit:cover;border:var(--rule);margin-top:0.5rem;display:none;}
+  .ph-preview.on{display:block;}
+
+  /* VERSION ROWS */
+  .ver-row{display:flex;align-items:center;justify-content:space-between;padding:0.85rem 1rem;background:var(--white);border:var(--rule);margin-bottom:0.4rem;}
+  .ver-info{flex:1;}
+  .ver-label{font-size:0.88rem;font-weight:500;}
+  .ver-meta{font-family:var(--mono);font-size:0.6rem;color:var(--gray-text);margin-top:0.2rem;}
+
+  /* TOAST */
+  .toast{position:fixed;bottom:2rem;right:2rem;z-index:999;padding:0.8rem 1.2rem;font-family:var(--mono);font-size:0.65rem;opacity:0;transition:opacity 0.3s;pointer-events:none;}
+  .toast.on{opacity:1;}
+  .toast.ok{background:#1a6b3a;color:#fff;}
+  .toast.err{background:var(--danger);color:#fff;}
+  .toast.info{background:var(--black);color:#fff;}
+
+  @media(max-width:700px){.admin-body{grid-template-columns:1fr;}.sidebar{position:static;height:auto;}.frow{grid-template-columns:1fr;}}
+</style>
+</head>
+<body>
+
+<!-- SETUP SCREEN (first run - enter GitHub details) -->
+<div class="screen" id="setup-screen" style="display:none;">
+  <div class="box">
+    <div class="box-logo">temporary.fund</div>
+    <div class="box-title">Setup admin panel</div>
+    <p class="box-sub">Connect to your GitHub repository so the admin panel can save changes directly. Your token is stored only in your browser and never sent anywhere except GitHub.</p>
+    <div class="field">
+      <label>GitHub Personal Access Token</label>
+      <input type="password" id="s-token" placeholder="ghp_...">
+    </div>
+    <div class="field">
+      <label>Repository owner (GitHub username or org)</label>
+      <input type="text" id="s-owner" placeholder="temporarycompany">
+    </div>
+    <div class="field">
+      <label>Repository name</label>
+      <input type="text" id="s-repo" placeholder="temporary.fund">
+    </div>
+    <div class="field">
+      <label>Branch</label>
+      <input type="text" id="s-branch" placeholder="main" value="main">
+    </div>
+    <p class="error-msg" id="setup-error">Could not connect. Check your token and repo details.</p>
+    <br>
+    <button class="btn btn-p" onclick="saveSetup()" style="width:100%;">Connect repository</button>
+    <br><br>
+    <p style="font-family:var(--mono);font-size:0.58rem;color:var(--gray-text);line-height:1.6;">
+      Token needs <strong>repo</strong> scope. Create one at GitHub > Settings > Developer Settings > Personal Access Tokens > Tokens (classic).
+    </p>
+  </div>
+</div>
+
+<!-- LOGIN SCREEN -->
+<div class="screen" id="login-screen">
+  <div class="box">
+    <div class="box-logo">temporary.fund</div>
+    <div class="box-title">Admin panel</div>
+    <p class="error-msg" id="login-error">Incorrect password.</p>
+    <div class="field">
+      <label>Password</label>
+      <input type="password" id="pw-input" placeholder="Enter admin password" onkeydown="if(event.key==='Enter')tryLogin()">
+    </div>
+    <br>
+    <button class="btn btn-p" onclick="tryLogin()" style="width:100%;">Sign in</button>
+    <br><br>
+    <p style="font-family:var(--mono);font-size:0.58rem;color:var(--gray-text);">Default password: <strong>tf-admin-2026</strong></p>
+  </div>
+</div>
+
+<!-- ADMIN SHELL -->
+<div class="admin-shell" id="admin-shell">
+  <div class="top-bar">
+    <span class="top-bar-logo">temporary.fund / admin</span>
+    <div class="top-bar-links">
+      <a href="team.html" target="_blank">team -></a>
+      <a href="advisors.html" target="_blank">advisors -></a>
+      <a href="#" onclick="logout()">sign out</a>
+    </div>
+  </div>
+
+  <div class="admin-body">
+    <div class="sidebar">
+      <div style="padding:0 0 0.5rem;">
+        <span class="sb-label">People</span>
+        <button class="sb-item on" onclick="showPanel('team')">Team</button>
+        <button class="sb-item" onclick="showPanel('advisors')">Advisors</button>
+        <button class="sb-item" onclick="showPanel('experts')">Expert Partners</button>
+      </div>
+      <div class="sb-divider"></div>
+      <div>
+        <span class="sb-label">System</span>
+        <button class="sb-item" onclick="showPanel('versions')">Version history</button>
+        <button class="sb-item" onclick="showPanel('settings')">Settings</button>
+      </div>
+    </div>
+
+    <div class="main">
+
+      <!-- STATUS BAR -->
+      <div class="status-bar">
+        <span class="status-text" id="status-text">Connected to GitHub</span>
+        <span style="font-family:var(--mono);font-size:0.6rem;color:var(--gray-mid);" id="repo-label"></span>
+      </div>
+
+      <!-- TEAM -->
+      <div class="panel on" id="panel-team">
+        <div class="main-hd">
+          <div><div class="main-title">Team</div><div class="main-meta" id="ct-team">0 members</div></div>
+          <button class="btn btn-p" onclick="openForm('team',null)">+ Add member</button>
+        </div>
+        <div id="list-team"></div>
+      </div>
+
+      <!-- ADVISORS -->
+      <div class="panel" id="panel-advisors">
+        <div class="main-hd">
+          <div><div class="main-title">Advisors</div><div class="main-meta" id="ct-advisors">0 advisors</div></div>
+          <button class="btn btn-p" onclick="openForm('advisors',null)">+ Add advisor</button>
+        </div>
+        <div id="list-advisors"></div>
+      </div>
+
+      <!-- EXPERTS -->
+      <div class="panel" id="panel-experts">
+        <div class="main-hd">
+          <div><div class="main-title">Expert Partners</div><div class="main-meta" id="ct-experts">0 experts</div></div>
+          <button class="btn btn-p" onclick="openForm('experts',null)">+ Add expert</button>
+        </div>
+        <div id="list-experts"></div>
+      </div>
+
+      <!-- FORM (inline, not modal) -->
+      <div class="panel" id="panel-form">
+        <div class="main-hd">
+          <div><div class="main-title" id="form-title">Add person</div><div class="main-meta" id="form-sub"></div></div>
+          <button class="btn btn-s" onclick="cancelForm()">Cancel</button>
+        </div>
+        <input type="hidden" id="f-section">
+        <input type="hidden" id="f-index">
+
+        <div class="form-card">
+          <span class="form-card-title">Basic information</span>
+          <div class="frow">
+            <div class="field"><label>Full name *</label><input type="text" id="f-name" placeholder="Jane Smith"></div>
+            <div class="field"><label>Title / Role *</label><input type="text" id="f-role" placeholder="IP Attorney"></div>
+          </div>
+          <div class="field"><label>One-line descriptor (shown on card)</label><input type="text" id="f-desc" placeholder="IP and contracts specialist for creative businesses"></div>
+          <div class="field">
+            <label>Photo URL</label>
+            <input type="url" id="f-photo" placeholder="https://..." oninput="previewPh()">
+            <img id="ph-prev" class="ph-preview" alt="Preview">
+          </div>
+        </div>
+
+        <div class="form-card">
+          <span class="form-card-title">Bio (shown in modal popup)</span>
+          <div class="field"><textarea id="f-bio" placeholder="Full biography, background, or areas of expertise..."></textarea></div>
+        </div>
+
+        <div class="form-card">
+          <span class="form-card-title">Links</span>
+          <div id="links-b"></div>
+          <button class="btn btn-s" onclick="addLink()" style="font-size:0.6rem;padding:0.45rem 0.9rem;margin-top:0.5rem;">+ Add link</button>
+        </div>
+
+        <div class="btn-row">
+          <button class="btn btn-p" onclick="savePerson()">Save and publish</button>
+          <button class="btn btn-s" onclick="cancelForm()">Cancel</button>
+          <button class="btn btn-d" id="del-btn" onclick="delPerson()" style="display:none;">Delete person</button>
+        </div>
+      </div>
+
+      <!-- VERSIONS -->
+      <div class="panel" id="panel-versions">
+        <div class="main-hd">
+          <div><div class="main-title">Version history</div><div class="main-meta">Git commit history - each save is a commit on GitHub</div></div>
+          <button class="btn btn-s" onclick="loadVersions()">Refresh</button>
+        </div>
+        <div id="version-list"><p style="font-family:var(--mono);font-size:0.65rem;color:var(--gray-text);">Loading...</p></div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div class="panel" id="panel-settings">
+        <div class="main-hd"><div class="main-title">Settings</div></div>
+        <div class="form-card">
+          <span class="form-card-title">Change admin password</span>
+          <div class="frow">
+            <div class="field"><label>New password</label><input type="password" id="new-pw" placeholder="New password"></div>
+            <div class="field"><label>Confirm</label><input type="password" id="conf-pw" placeholder="Confirm"></div>
+          </div>
+          <div class="btn-row"><button class="btn btn-p" onclick="changePw()">Save password</button></div>
+        </div>
+        <div class="form-card" style="margin-top:1rem;">
+          <span class="form-card-title">GitHub connection</span>
+          <p style="font-family:var(--mono);font-size:0.62rem;color:var(--gray-text);margin-bottom:1rem;" id="gh-status-detail"></p>
+          <div class="btn-row">
+            <button class="btn btn-s" onclick="resetSetup()">Reconnect / change repository</button>
+          </div>
+        </div>
+        <div class="form-card" style="margin-top:1rem;">
+          <span class="form-card-title">Export</span>
+          <p style="font-size:0.88rem;color:var(--gray-text);margin-bottom:1rem;line-height:1.6;">Download a local JSON backup of all people data.</p>
+          <div class="btn-row"><button class="btn btn-s" onclick="exportJSON()">Download JSON backup</button></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── CONFIG KEYS ───────────────────────────────────────────────────────────
+const LS_TOKEN  = 'tf_gh_token';
+const LS_OWNER  = 'tf_gh_owner';
+const LS_REPO   = 'tf_gh_repo';
+const LS_BRANCH = 'tf_gh_branch';
+const LS_PW     = 'tf_admin_pw';
+const LS_AUTHED = 'tf_authed';
+const FILE_PATH = 'people.json';
+const DEFAULT_PW = 'tf-admin-2026';
+
+let state = { team: [], advisors: [], experts: [] };
+let currentPanel = 'team';
+let prevPanel = 'team';
+
+// ── HELPERS ───────────────────────────────────────────────────────────────
+const $ = id => document.getElementById(id);
+const gh = () => ({ token: ls(LS_TOKEN), owner: ls(LS_OWNER), repo: ls(LS_REPO), branch: ls(LS_BRANCH) || 'main' });
+const ls = k => localStorage.getItem(k) || '';
+const lsSet = (k,v) => localStorage.setItem(k,v);
+const lsDel = k => localStorage.removeItem(k);
+
+function toast(msg, type='info') {
+  const t = $('toast');
+  t.textContent = msg;
+  t.className = 'toast on ' + type;
+  setTimeout(() => t.className = 'toast', 3000);
+}
+
+function status(msg, type='') {
+  const el = $('status-text');
+  el.textContent = msg;
+  el.className = 'status-text ' + type;
+}
+
+function initials(name) {
+  return (name || '?').split(' ').map(w => w[0]).join('').toUpperCase().slice(0,2);
+}
+
+// ── SETUP ─────────────────────────────────────────────────────────────────
+function isSetup() { return !!(ls(LS_TOKEN) && ls(LS_OWNER) && ls(LS_REPO)); }
+
+async function saveSetup() {
+  const token = $('s-token').value.trim();
+  const owner = $('s-owner').value.trim();
+  const repo  = $('s-repo').value.trim();
+  const branch = $('s-branch').value.trim() || 'main';
+  if (!token || !owner || !repo) return;
+  // Test connection
+  const r = await fetch(`https://api.github.com/repos/${owner}/${repo}`, {
+    headers: { Authorization: 'token ' + token }
+  });
+  if (!r.ok) { $('setup-error').style.display = 'block'; return; }
+  lsSet(LS_TOKEN, token); lsSet(LS_OWNER, owner); lsSet(LS_REPO, repo); lsSet(LS_BRANCH, branch);
+  $('setup-screen').style.display = 'none';
+  showLogin();
+}
+
+function resetSetup() {
+  lsDel(LS_TOKEN); lsDel(LS_OWNER); lsDel(LS_REPO); lsDel(LS_BRANCH);
+  lsDel(LS_AUTHED);
+  location.reload();
+}
+
+// ── AUTH ──────────────────────────────────────────────────────────────────
+function showLogin() {
+  $('login-screen').style.display = 'flex';
+}
+
+function tryLogin() {
+  const pw = ls(LS_PW) || DEFAULT_PW;
+  if ($('pw-input').value === pw) {
+    lsSet(LS_AUTHED, '1');
+    $('login-screen').style.display = 'none';
+    initAdmin();
+  } else {
+    $('login-error').style.display = 'block';
+    $('pw-input').value = '';
+  }
+}
+
+function logout() {
+  lsDel(LS_AUTHED);
+  location.reload();
+}
+
+function changePw() {
+  const np = $('new-pw').value, cp = $('conf-pw').value;
+  if (!np) return toast('Enter a new password', 'err');
+  if (np !== cp) return toast('Passwords do not match', 'err');
+  lsSet(LS_PW, np);
+  $('new-pw').value = ''; $('conf-pw').value = '';
+  toast('Password updated', 'ok');
+}
+
+// ── GITHUB API ────────────────────────────────────────────────────────────
+async function ghGet(path) {
+  const { token, owner, repo } = gh();
+  const r = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+    headers: { Authorization: 'token ' + token, Accept: 'application/vnd.github.v3+json' }
+  });
+  if (!r.ok) throw new Error('GitHub GET failed: ' + r.status);
+  return r.json();
+}
+
+async function ghPut(path, content, message, sha) {
+  const { token, owner, repo, branch } = gh();
+  const body = { message, content: btoa(unescape(encodeURIComponent(content))), branch };
+  if (sha) body.sha = sha;
+  const r = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${path}`, {
+    method: 'PUT',
+    headers: { Authorization: 'token ' + token, Accept: 'application/vnd.github.v3+json', 'Content-Type': 'application/json' },
+    body: JSON.stringify(body)
+  });
+  if (!r.ok) throw new Error('GitHub PUT failed: ' + r.status);
+  return r.json();
+}
+
+async function loadFromGitHub() {
+  try {
+    status('Loading from GitHub...', 'saving');
+    const file = await ghGet(FILE_PATH);
+    const content = decodeURIComponent(escape(atob(file.content.replace(/\n/g,''))));
+    state = JSON.parse(content);
+    status('Connected to GitHub', '');
+    return file.sha;
+  } catch(e) {
+    // File may not exist yet - that's fine
+    status('Connected - people.json not yet created', '');
+    return null;
+  }
+}
+
+async function saveToGitHub(message) {
+  const { owner, repo } = gh();
+  $('repo-label').textContent = owner + '/' + repo;
+  try {
+    status('Saving to GitHub...', 'saving');
+    let sha = null;
+    try { const f = await ghGet(FILE_PATH); sha = f.sha; } catch(e) {}
+    await ghPut(FILE_PATH, JSON.stringify(state, null, 2), message, sha);
+    status('Saved to GitHub - ' + new Date().toLocaleTimeString(), 'saved');
+    toast('Saved and published', 'ok');
+  } catch(e) {
+    status('Save failed - ' + e.message, 'error');
+    toast('Save failed: ' + e.message, 'err');
+  }
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────
+async function initAdmin() {
+  $('admin-shell').classList.add('on');
+  const { owner, repo } = gh();
+  $('repo-label').textContent = owner + '/' + repo;
+  $('gh-status-detail').textContent = 'Connected to ' + owner + '/' + repo;
+  await loadFromGitHub();
+  renderAll();
+}
+
+// ── RENDER ────────────────────────────────────────────────────────────────
+function renderAll() {
+  renderList('team'); renderList('advisors'); renderList('experts');
+}
+
+function renderList(section) {
+  const list = $(  'list-' + section);
+  const count = $('ct-' + section);
+  const people = state[section] || [];
+  const labels = { team: 'members', advisors: 'advisors', experts: 'experts' };
+  count.textContent = people.length + ' ' + labels[section];
+  if (!people.length) {
+    list.innerHTML = '<p style="font-family:var(--mono);font-size:0.65rem;color:var(--gray-text);padding:1rem;">None yet. Click + Add to get started.</p>';
+    return;
+  }
+  list.innerHTML = people.map((p, i) => `
+    <div class="person-row">
+      ${p.photo
+        ? `<img class="p-avatar" src="${p.photo}" alt="${p.name}" onerror="this.outerHTML='<div class=p-avatar>${initials(p.name)}</div>'">`
+        : `<div class="p-avatar">${initials(p.name)}</div>`}
+      <div class="p-info">
+        <div class="p-name">${p.name}</div>
+        <div class="p-role">${p.role}</div>
+      </div>
+      <div class="p-btns">
+        ${i > 0 ? `<button class="ic-btn" onclick="move('${section}',${i},-1)">up</button>` : ''}
+        ${i < people.length-1 ? `<button class="ic-btn" onclick="move('${section}',${i},1)">dn</button>` : ''}
+        <button class="ic-btn" onclick="openForm('${section}',${i})">edit</button>
+      </div>
+    </div>`).join('');
+}
+
+function move(section, i, dir) {
+  const arr = state[section];
+  const j = i + dir;
+  if (j < 0 || j >= arr.length) return;
+  [arr[i], arr[j]] = [arr[j], arr[i]];
+  saveToGitHub('Reorder ' + section).then(() => renderAll());
+}
+
+// ── FORM ──────────────────────────────────────────────────────────────────
+function openForm(section, index) {
+  prevPanel = currentPanel;
+  $('f-section').value = section;
+  $('f-index').value = index === null ? '' : index;
+  const isEdit = index !== null;
+  const p = isEdit ? (state[section][index] || {}) : {};
+  $('form-title').textContent = isEdit ? 'Edit person' : 'Add person';
+  $('form-sub').textContent = section.charAt(0).toUpperCase() + section.slice(1);
+  $('f-name').value = p.name || '';
+  $('f-role').value = p.role || '';
+  $('f-desc').value = p.descriptor || '';
+  $('f-photo').value = p.photo || '';
+  $('f-bio').value = p.bio || '';
+  $('del-btn').style.display = isEdit ? 'block' : 'none';
+  const prev = $('ph-prev');
+  if (p.photo) { prev.src = p.photo; prev.classList.add('on'); } else { prev.src = ''; prev.classList.remove('on'); }
+  renderLinks(p.links || []);
+  showPanel('form');
+}
+
+function cancelForm() { showPanel(prevPanel); }
+
+function renderLinks(links) {
+  $('links-b').innerHTML = links.map((l,i) => linkRow(l.label, l.url, i)).join('');
+}
+
+function linkRow(label, url, i) {
+  return `<div class="link-row" id="lr-${i}">
+    <input class="link-label" type="text" placeholder="Label" value="${label||''}" id="ll-${i}">
+    <input type="url" placeholder="https://..." value="${url||''}" id="lu-${i}">
+    <button class="ic-btn red" onclick="rmLink(${i})">x</button>
+  </div>`;
+}
+
+function addLink() {
+  const b = $('links-b');
+  const i = b.children.length;
+  b.insertAdjacentHTML('beforeend', linkRow('','',i));
+}
+
+function rmLink(i) { $('lr-'+i)?.remove(); }
+
+function collectLinks() {
+  return Array.from($('links-b').querySelectorAll('.link-row')).map(row => {
+    const inputs = row.querySelectorAll('input');
+    return { label: inputs[0].value.trim(), url: inputs[1].value.trim() };
+  }).filter(l => l.label && l.url);
+}
+
+function previewPh() {
+  const url = $('f-photo').value;
+  const p = $('ph-prev');
+  if (url) { p.src = url; p.classList.add('on'); } else { p.src=''; p.classList.remove('on'); }
+}
+
+function savePerson() {
+  const section = $('f-section').value;
+  const idxStr = $('f-index').value;
+  const isEdit = idxStr !== '';
+  const name = $('f-name').value.trim();
+  const role = $('f-role').value.trim();
+  if (!name || !role) return toast('Name and role are required', 'err');
+  const person = {
+    name, role,
+    descriptor: $('f-desc').value.trim(),
+    photo: $('f-photo').value.trim(),
+    bio: $('f-bio').value.trim(),
+    links: collectLinks()
+  };
+  if (!state[section]) state[section] = [];
+  if (isEdit) state[section][parseInt(idxStr)] = person;
+  else state[section].push(person);
+  renderAll();
+  showPanel(section);
+  saveToGitHub((isEdit ? 'Update: ' : 'Add: ') + name);
+}
+
+function delPerson() {
+  const section = $('f-section').value;
+  const idx = parseInt($('f-index').value);
+  const name = state[section][idx]?.name || 'person';
+  if (!confirm('Delete ' + name + '?')) return;
+  state[section].splice(idx, 1);
+  renderAll();
+  showPanel(section);
+  saveToGitHub('Delete: ' + name);
+}
+
+// ── VERSIONS ──────────────────────────────────────────────────────────────
+async function loadVersions() {
+  const list = $('version-list');
+  list.innerHTML = '<p style="font-family:var(--mono);font-size:0.65rem;color:var(--gray-text);">Loading commit history...</p>';
+  try {
+    const { token, owner, repo, branch } = gh();
+    const r = await fetch(`https://api.github.com/repos/${owner}/${repo}/commits?path=${FILE_PATH}&per_page=10&sha=${branch}`, {
+      headers: { Authorization: 'token ' + token }
+    });
+    if (!r.ok) throw new Error('Failed to load commits');
+    const commits = await r.json();
+    if (!commits.length) {
+      list.innerHTML = '<p style="font-family:var(--mono);font-size:0.65rem;color:var(--gray-text);">No commits yet. Make your first save from the People panels.</p>';
+      return;
+    }
+    list.innerHTML = commits.map(c => {
+      const d = new Date(c.commit.author.date);
+      const timeStr = d.toLocaleDateString('en-US',{month:'short',day:'numeric',year:'numeric'}) + ' at ' + d.toLocaleTimeString('en-US',{hour:'numeric',minute:'2-digit'});
+      return `<div class="ver-row">
+        <div class="ver-info">
+          <div class="ver-label">${c.commit.message}</div>
+          <div class="ver-meta">${timeStr} - ${c.sha.slice(0,7)}</div>
+        </div>
+        <div class="p-btns">
+          <button class="ic-btn" onclick="restoreVersion('${c.sha}','${c.commit.message}')">Restore</button>
+        </div>
+      </div>`;
+    }).join('');
+  } catch(e) {
+    list.innerHTML = '<p style="font-family:var(--mono);font-size:0.65rem;color:var(--danger);">Could not load history: ' + e.message + '</p>';
+  }
+}
+
+async function restoreVersion(sha, label) {
+  if (!confirm('Restore to "' + label + '"? Current state will be saved first.')) return;
+  try {
+    status('Restoring...', 'saving');
+    const { token, owner, repo } = gh();
+    const r = await fetch(`https://api.github.com/repos/${owner}/${repo}/contents/${FILE_PATH}?ref=${sha}`, {
+      headers: { Authorization: 'token ' + token }
+    });
+    if (!r.ok) throw new Error('Could not fetch that version');
+    const file = await r.json();
+    const content = decodeURIComponent(escape(atob(file.content.replace(/\n/g,''))));
+    state = JSON.parse(content);
+    await saveToGitHub('Restore to: ' + label);
+    renderAll();
+    toast('Restored', 'ok');
+  } catch(e) {
+    toast('Restore failed: ' + e.message, 'err');
+  }
+}
+
+// ── PANELS ────────────────────────────────────────────────────────────────
+function showPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('on'));
+  document.querySelectorAll('.sb-item').forEach(b => b.classList.remove('on'));
+  $('panel-' + name).classList.add('on');
+  const btn = document.querySelector(`[onclick="showPanel('${name}')"]`);
+  if (btn) btn.classList.add('on');
+  currentPanel = name;
+  if (name === 'versions') loadVersions();
+}
+
+// ── EXPORT ────────────────────────────────────────────────────────────────
+function exportJSON() {
+  const blob = new Blob([JSON.stringify(state, null, 2)], {type:'application/json'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'tf-people-' + new Date().toISOString().slice(0,10) + '.json';
+  a.click();
+}
+
+// ── BOOT ──────────────────────────────────────────────────────────────────
+(function boot() {
+  if (!isSetup()) {
+    $('login-screen').style.display = 'none';
+    $('setup-screen').style.display = 'flex';
+    return;
+  }
+  if (sessionStorage.getItem(LS_AUTHED) === '1' || ls(LS_AUTHED) === '1') {
+    $('login-screen').style.display = 'none';
+    initAdmin();
+    return;
+  }
+  $('login-screen').style.display = 'flex';
+})();
+</script>
+</body>
+</html>
